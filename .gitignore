@@ -35,11 +35,13 @@
 *.xcodeproj
 *.xcworkspace
 *.sln
+*.slnx
 *.suo
 *.opensdf
 *.sdf
 *.VC.db
 *.VC.opendb
+.vsconfig
 
 # Precompiled Assets
 SourceArt/**/*.png
@@ -72,3 +74,8 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# My Ignores
+Content/_ExternalAssets/*
+Content/__ExternalActors__/*
+Content/__ExternalObjects__/*
