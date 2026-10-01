@@ -53,7 +53,7 @@ void AMyPlayerController::SetupInputComponent()
 		// Fire
 		if (FireAction)
 		{
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AMyPlayerController::OnFireInputStart);
+			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Started, this, &AMyPlayerController::OnFireInputStart);
 		}
 	}
 }

@@ -1,70 +1,96 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GAS/Ability/GameplayAbility_Fireball.h"
-
-#include "GAS/PlayerAttributeSet.h"
+#include "Projectiles/FireballProjectile.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
-#include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/Character.h"
+#include "Engine/World.h"
 
 UGameplayAbility_Fireball::UGameplayAbility_Fireball()
 {
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+    InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
-void UGameplayAbility_Fireball::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo * ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData * TriggerEventData)
+void UGameplayAbility_Fireball::ActivateAbility(
+    const FGameplayAbilitySpecHandle Handle,
+    const FGameplayAbilityActorInfo* ActorInfo,
+    const FGameplayAbilityActivationInfo ActivationInfo,
+    const FGameplayEventData* TriggerEventData)
 {
-	// 코스트와 쿨다운 검사 후, 가능하면 적용
-	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
-	{
-		// Ability가 제대로 실행되지 않은 경우, End
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);	// 마지막 true는 정상적인 종료가 아니라는 표시
-		return;
-	}
+    ACharacter* Character =
+        ActorInfo
+        ? Cast<ACharacter>(ActorInfo->AvatarActor.Get())
+        : nullptr;
 
-	// ASC 없으면 종료
-	UAbilitySystemComponent* ASC = ActorInfo ? ActorInfo->AbilitySystemComponent.Get() : nullptr;
-	if (!ASC)
-	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);	// 마지막 true는 정상적인 종료가 아니라는 표시
-		return;
-	}
+    UAbilitySystemComponent* SourceASC =
+        ActorInfo
+        ? ActorInfo->AbilitySystemComponent.Get()
+        : nullptr;
 
-	// Burning 디버프 적용
-	if (BurningDebuffEffectClass)
-	{
-		FGameplayEffectSpecHandle DebuffSpecHandle = MakeOutgoingGameplayEffectSpec(Handle, ActorInfo, ActivationInfo, BurningDebuffEffectClass, GetAbilityLevel(Handle, ActorInfo));
+    // Ability 발동에 필요한 게 하나라도 없으면 Ability 취소
+    if (!Character || !SourceASC || !ProjectileClass
+        || !DamageEffectClass || !BurnEffectClass
+        || !GetCostGameplayEffect()
+        || !GetCooldownGameplayEffect())
+    {
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+        return;
+    }
 
-		if (DebuffSpecHandle.IsValid())
-		{
-			DebuffEffectHandle = ApplyGameplayEffectSpecToTarget(Handle, ActorInfo, ActivationInfo, DebuffSpecHandle);
-		}
+    const float Level = GetAbilityLevel(Handle, ActorInfo);
 
-		// Mana Cost 소모 이펙트 적용
-		if (ManaCostEffectClass)
-		{
-			FGameplayEffectSpecHandle CostSpecHandle = MakeOutgoingGameplayEffectSpec(Handle, ActorInfo, ActivationInfo, SprintCostEffectClass, GetAbilityLevel(Handle, ActorInfo));
+    FGameplayEffectSpecHandle DamageSpec = MakeOutgoingGameplayEffectSpec(DamageEffectClass, Level);
+    FGameplayEffectSpecHandle BurnSpec = MakeOutgoingGameplayEffectSpec(BurnEffectClass, Level);
 
-			if (CostSpecHandle.IsValid())
-			{
-				CostEffectHandle = ApplyGameplayEffectSpecToOwner(Handle, ActorInfo, ActivationInfo, CostSpecHandle);
-			}
-		}
+    // 이펙트 Spec 생성 실패 또는 비용/쿨타임 조건 불충족 시 Ability 취소
+    if (!DamageSpec.IsValid() || !BurnSpec.IsValid()
+        || !CommitCheck(Handle, ActorInfo, ActivationInfo))
+    {
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+        return;
+    }
 
-	}
+    // 발사할 Transform 정보 저장
+    const FRotator Rotation = Character->GetActorRotation();
+    const FVector Location =
+        Character->GetMesh()->DoesSocketExist(FireSocket)
+        ? Character->GetMesh()->GetSocketLocation(FireSocket)
+        : Character->GetActorLocation() + Character->GetActorForwardVector();
+    const FTransform Transform(Rotation, Location);
+
+    /* 발사체  스폰 */
+    // 일반 SpawnActor()는 반환되기 전에 BeginPlay()가 실행되기 때문에
+    // InitializeEffects() 호출 전에 발사체의 충돌 처리가 시작될 수 있음
+    // -> 지연 스폰으로 구현
+
+    // 발사체 스폰 지연 시작: 생성 완료 전에 필요한 데이터 설정
+    AFireballProjectile* Projectile = Character->GetWorld()->SpawnActorDeferred<AFireballProjectile>(
+        ProjectileClass,
+        Transform,
+        Character,
+        Character,
+        ESpawnActorCollisionHandlingMethod::AlwaysSpawn);
+
+    // 발사체 생성 실패 시 Ability 취소
+    if (!Projectile)
+    {
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+        return;
+    }
+
+    // 발사체 명중 시 적용할 이펙트 Spec과 시전자 ASC 전달
+    Projectile->InitializeEffects(SourceASC, DamageSpec, BurnSpec);
+
+    // 비용/쿨타임 커밋 실패 시 발사체 제거 후 Ability 취소
+    if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
+    {
+        Projectile->Destroy();
+        EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+        return;
+    }
+
+    // 발사체 스폰 완료
+    Projectile->FinishSpawning(Transform);
+
+    // 발사 완료 후 Ability 정상 종료
+    EndAbility(Handle, ActorInfo, ActivationInfo, true, false);
 }
-
-void UGameplayAbility_Fireball::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo * ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{}
-
-bool UGameplayAbility_Fireball::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo * ActorInfo, OUT FGameplayTagContainer * OptionalRelevantTags) const
-{
-	return false;
-}
-
-void UGameplayAbility_Fireball::OnStaminaChanged(const FOnAttributeChangeData& InData)
-{}
-
-void UGameplayAbility_Fireball::OnWaitInputPressCallback(float InElapsedTime)
-{}

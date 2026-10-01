@@ -13,7 +13,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
-class UNiagaraSystem;
+class UGameplayAbility;
 
 UCLASS()
 class TEST_GAS_API AMyPlayerCharacter : public AMyAbilityCharacter
@@ -47,9 +47,6 @@ protected:
 	// Fireball 어빌리티 부여
 	void GiveFireballAbilities();
 
-	// 실제로 발사체를 발사하는 함수
-	void Fire();
-
 protected :
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -62,16 +59,10 @@ protected :
 	TObjectPtr<UPlayerAttributeSet> AttributeSet;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
-	TObjectPtr<UGameplayAbility> FireballAbilityClass;
+	TSubclassOf<UGameplayAbility> FireballAbilityClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Abillity", meta = (Config = "1"))
 	int32 FireballAbilityLevel = 1;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Test|RPC")
-	TSubclassOf<AActor> FireballProjectileClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Test|RPC")
-	TObjectPtr<UNiagaraSystem> HitVFX;
 
 private :
 

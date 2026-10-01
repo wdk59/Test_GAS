@@ -11,7 +11,7 @@ public class Test_GAS : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore",
-			"GameplayAbilities", "GameplayTags",	// GAS 관련
+			"GameplayAbilities", "GameplayTags", "GameplayTasks",	// GAS 관련
 			"UMG", "Slate", "SlateCore",							// 위젯 관련
 			"EnhancedInput",
 			"Niagara"

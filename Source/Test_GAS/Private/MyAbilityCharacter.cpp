@@ -34,15 +34,10 @@ void AMyAbilityCharacter::Tick(float DeltaTime)
 
 }
 
-// Called to bind functionality to input
-void AMyAbilityCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
 void AMyAbilityCharacter::PossessedBy(AController* NewController)
 {
+	Super::PossessedBy(NewController);
+
 	if (IsValid(ASC))
 	{
 		ASC->InitAbilityActorInfo(this, this);

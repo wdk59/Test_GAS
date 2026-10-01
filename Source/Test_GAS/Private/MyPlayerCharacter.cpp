@@ -33,11 +33,10 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 
 void AMyPlayerCharacter::OnFireInputStart()
 {
-	if (ASC)
+	if (ASC && FireballAbilityHandle.IsValid())
 	{
-		ASC->AbilityLocalInputPressed(FireballInputID);
+		ASC->TryActivateAbility(FireballAbilityHandle);
 	}
-	Fire();
 }
 
 void AMyPlayerCharacter::PossessedBy(AController* NewController)
@@ -82,7 +81,7 @@ void AMyPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 
 void AMyPlayerCharacter::GiveFireballAbilities()
 {
-	if (!ASC)
+	if (!ASC || FireballAbilityHandle.IsValid())
 		return;
 	
 	// ASC 초기화 확인
@@ -95,26 +94,5 @@ void AMyPlayerCharacter::GiveFireballAbilities()
 	{
 		FGameplayAbilitySpec Spec(FireballAbilityClass, FireballAbilityLevel, FireballInputID);
 		FireballAbilityHandle = ASC->GiveAbility(Spec);
-	}
-}
-
-void AMyPlayerCharacter::Fire()
-{
-	if (FireballProjectileClass)
-	{
-		//FVector SpawnLocation = FireTransform->GetComponentLocation();
-		FVector SpawnLocation = GetMesh()->GetSocketLocation(TEXT("FireSocket"));
-		FRotator SpawnRotator = GetActorRotation();
-
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;					// Connection을 위해 Owner 필수 지정
-		SpawnParams.Instigator = GetInstigator();
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		GetWorld()->SpawnActor<AActor>(
-			FireballProjectileClass,
-			SpawnLocation,
-			SpawnRotator,
-			SpawnParams
-		);
 	}
 }

@@ -1,51 +1,57 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
-
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayEffectTypes.h"
 #include "FireballProjectile.generated.h"
 
+class UStaticMeshComponent;
+class UAbilitySystemComponent;
 class UProjectileMovementComponent;
-class UNiagaraSystem;
 
 UCLASS()
 class TEST_GAS_API AFireballProjectile : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AFireballProjectile();
+    GENERATED_BODY()
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+public:
 
-	UFUNCTION()
-	void OnHit(AActor* SelfActor, AActor* OtherActor, FVector NormalImpulse, const FHitResult& Hit);
+    AFireballProjectile();
 
-	UFUNCTION()
-	void SpawnHitEffect(const FVector& InLocation, const FRotator& InRotator);
+    void InitializeEffects(
+        UAbilitySystemComponent* Source,
+        const FGameplayEffectSpecHandle& Damage,
+        const FGameplayEffectSpecHandle& Burn);
 
 protected:
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UStaticMeshComponent> Mesh;
+    virtual void BeginPlay() override;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UProjectileMovementComponent> Movement;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "VFX")
-	TObjectPtr<UNiagaraSystem> HitVFX;
-
-	UPROPERTY(VisibleAnywhere, Category = "Test")
-	float Damage = 10.f;
+    UFUNCTION()
+    void OnHit(
+        AActor* SelfActor,
+        AActor* OtherActor,
+        FVector NormalImpulse,
+        const FHitResult& Hit);
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Fireball")
+    TObjectPtr<UStaticMeshComponent> Mesh;
+    
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Fireball")
+    TObjectPtr<UProjectileMovementComponent> Movement;
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Fireball")
+    FGameplayTag BurnStateTag;
+    
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Fireball")
+    FGameplayTag DamageMagnitudeTag;
 
 private:
 
-	bool bHit = false;
+    TWeakObjectPtr<UAbilitySystemComponent> SourceASC;
 
-	float FireballLifeSpan = 10.f;
+    FGameplayEffectSpecHandle DamageSpec;
 
+    FGameplayEffectSpecHandle BurnSpec;
+
+    bool bHit = false;  // 발사체 충돌 여부
 };
