@@ -3,17 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "MyAbilityCharacter.h"
-#include "MyPlayerCharacter.generated.h"
+#include "GameFramework/Character.h"
+#include "MyAbilityCharacter.generated.h"
 
 UCLASS()
-class TEST_GAS_API AMyPlayerCharacter : public AMyAbilityCharacter
+class TEST_GAS_API AMyAbilityCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AMyPlayerCharacter();
+	AMyAbilityCharacter();
 
 protected:
 	// Called when the game starts or when spawned
