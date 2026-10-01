@@ -7,7 +7,6 @@
 
 #include "GAS/PlayerAttributeSet.h"
 #include "GameplayAbilitySpecHandle.h"
-#include "GameplayEffectTypes.h"
 
 #include "MyPlayerCharacter.generated.h"
 

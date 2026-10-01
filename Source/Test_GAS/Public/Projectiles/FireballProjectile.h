@@ -7,6 +7,7 @@
 class UStaticMeshComponent;
 class UAbilitySystemComponent;
 class UProjectileMovementComponent;
+class UNiagaraComponent;
 
 UCLASS()
 class TEST_GAS_API AFireballProjectile : public AActor
@@ -38,6 +39,9 @@ protected:
     
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Fireball")
     TObjectPtr<UProjectileMovementComponent> Movement;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Fireball|VFX")
+    TObjectPtr<UNiagaraComponent> FireballVFX;
     
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Fireball")
     FGameplayTag BurnStateTag;

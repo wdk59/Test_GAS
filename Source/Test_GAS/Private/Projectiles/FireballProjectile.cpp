@@ -4,6 +4,7 @@
 #include "GAS/EnemyAttributeSet.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraComponent.h"
 
 AFireballProjectile::AFireballProjectile()
 {
@@ -15,6 +16,12 @@ AFireballProjectile::AFireballProjectile()
     Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     Mesh->SetCollisionResponseToAllChannels(ECR_Block);
     Mesh->SetNotifyRigidBodyCollision(true);
+
+    FireballVFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("FireballVFX"));
+    FireballVFX->SetupAttachment(Mesh);
+    FireballVFX->SetAbsolute(false, false, true);   // Mesh 크기 따라 작아지지 않도록 설정
+    FireballVFX->SetAutoActivate(true);
+
     Movement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("Movement"));
     Movement->SetUpdatedComponent(Mesh);
     Movement->InitialSpeed = 1000.f;
