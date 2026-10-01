@@ -13,6 +13,7 @@ void UResourceBarWidget::NativePreConstruct()
 	SetResourceBarColor(FillColor);
 }
 
+#if WITH_EDITOR
 void UResourceBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -31,6 +32,7 @@ void UResourceBarWidget::PostEditChangeProperty(FPropertyChangedEvent& PropertyC
 
 	SetResourceBarColor(FillColor);
 }
+#endif
 
 void UResourceBarWidget::UpdateResourceBar(float InCurrent, float InMax)
 {
