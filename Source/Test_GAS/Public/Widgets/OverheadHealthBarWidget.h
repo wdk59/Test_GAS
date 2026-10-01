@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "OverheadHealthBarWidget.generated.h"
 
+class UResourceBarWidget;
+
 /**
  * 
  */
@@ -13,5 +15,14 @@ UCLASS()
 class TEST_GAS_API UOverheadHealthBarWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UResourceBarWidget> HealthBar = nullptr;
+
+public:
+
+	virtual void InitializeOverheadHealthBar(AActor* InActor);
 	
 };

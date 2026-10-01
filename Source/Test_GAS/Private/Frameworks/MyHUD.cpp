@@ -22,9 +22,6 @@ void AMyHUD::InitHUD(APawn* InPawn)
 		if (HUDWidget)
 		{
 			HUDWidget->AddToViewport();
-
-			// HUD 준비 완료 델리게이트 발송
-			OnHUDWidgetReady.Broadcast(HUDWidget);
 		}
 	}
 
@@ -32,7 +29,7 @@ void AMyHUD::InitHUD(APawn* InPawn)
 	// -> 플레이어가 컨트롤러에 Possess될 때도 실행되도록 InitHUD() 호출하기
 	if (HUDWidget)
 	{
-		//HUDWidget->InitializeWithAbilitySystem(InPawn);
+		HUDWidget->InitializeWithAbilitySystem(InPawn);
 	}
 }
 

@@ -11,15 +11,12 @@ class UMyHUDWidget;
 /**
  * 
  */
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHUDWidgetReady, UMyHUDWidget*);
 UCLASS()
 class TEST_GAS_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
 
 public :
-
-	FOnHUDWidgetReady OnHUDWidgetReady;
 
 	UFUNCTION(BlueprintCallable)
 	void InitHUD(APawn* InPawn);

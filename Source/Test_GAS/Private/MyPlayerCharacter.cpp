@@ -12,7 +12,6 @@
 // Sets default values
 AMyPlayerCharacter::AMyPlayerCharacter()
 {
- 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = 400.f;
@@ -21,6 +20,8 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
+
+	AttributeSet = CreateDefaultSubobject<UPlayerAttributeSet>(TEXT("Stat"));
 
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationPitch = false;
