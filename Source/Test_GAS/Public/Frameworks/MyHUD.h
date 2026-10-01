@@ -6,12 +6,37 @@
 #include "GameFramework/HUD.h"
 #include "MyHUD.generated.h"
 
+class UMyHUDWidget;
+
 /**
  * 
  */
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHUDWidgetReady, UMyHUDWidget*);
 UCLASS()
 class TEST_GAS_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
+
+public :
+
+	FOnHUDWidgetReady OnHUDWidgetReady;
+
+	UFUNCTION(BlueprintCallable)
+	void InitHUD(APawn* InPawn);
+
+	UFUNCTION(BlueprintCallable)
+	UMyHUDWidget* GetHUDWIdget() const { return HUDWidget; }
+
+protected :
+
+	virtual void BeginPlay() override;
+
+protected :
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UUserWidget> HUDWidgetClass;
 	
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UMyHUDWidget> HUDWidget;
+
 };
