@@ -7,6 +7,8 @@ UEnemyAttributeSet::UEnemyAttributeSet()
 {
 	InitHealth(100.f);
 	InitMaxHealth(100.f);
+
+	InitDamage(0.f);
 }
 
 void UEnemyAttributeSet::PreAttributeChange(const FGameplayAttribute & Attribute, float& NewValue)
@@ -36,6 +38,26 @@ void UEnemyAttributeSet::PostAttributeChange(const FGameplayAttribute & Attribut
 		AdjustAttributeForMaxChange(OldValue, NewValue, GetHealthAttribute());
 
 		OnMaxHealthChange.Broadcast(GetHealth(), NewValue);
+	}
+}
+
+void UEnemyAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data)
+{
+	Super::PostGameplayEffectExecute(Data);
+
+	if (Data.EvaluatedData.Attribute == GetDamageAttribute())
+	{
+		const float LocalDamage = GetDamage();
+		SetDamage(0.f);	// Damage 즉시 비우기
+
+		if (LocalDamage > 0)
+		{
+			float FinalDamage = LocalDamage;	// 방어력 없으므로 Damage 그대로 받음
+			FinalDamage = FMath::Max(1.f, FinalDamage);	// 맞으면 최소 1
+
+			const float NewHealth = FMath::Clamp(GetHealth() - FinalDamage, 0.f, GetMaxHealth());
+			SetHealth(NewHealth);
+		}
 	}
 }
 

@@ -29,6 +29,9 @@ public:
 	// 적용 후 값의 변화 감지나 UI에 반영하기 위해 사용
 	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
 
+	// 이펙트가 적용된 후에 실행되는 함수 (Damage용)
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
+
 protected:
 
 	void AdjustAttributeForMaxChange(float InOldValue, float InNewMaxValue, const FGameplayAttribute& AffectedAttributeProperty);
@@ -52,5 +55,11 @@ public :
 	UPROPERTY(BlueprintReadOnly, Category = "Base Stat")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS_BASIC(UEnemyAttributeSet, MaxHealth);
+
+	// Meta Attribute
+	// Damage 타입
+	UPROPERTY(BlueprintReadOnly, Category = "Meta Attribute")
+	FGameplayAttributeData Damage;
+	ATTRIBUTE_ACCESSORS_BASIC(UEnemyAttributeSet, Damage);
 
 };

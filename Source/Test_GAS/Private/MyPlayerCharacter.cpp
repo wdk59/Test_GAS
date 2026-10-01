@@ -31,6 +31,15 @@ AMyPlayerCharacter::AMyPlayerCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 500.f, 0.f);
 }
 
+void AMyPlayerCharacter::OnFireInputStart()
+{
+	if (ASC)
+	{
+		ASC->AbilityLocalInputPressed(FireballInputID);
+	}
+	Fire();
+}
+
 void AMyPlayerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
@@ -89,10 +98,23 @@ void AMyPlayerCharacter::GiveFireballAbilities()
 	}
 }
 
-void AMyPlayerCharacter::OnFireInputStart()
+void AMyPlayerCharacter::Fire()
 {
-	if (ASC)
+	if (FireballProjectileClass)
 	{
-		ASC->AbilityLocalInputPressed(FireballInputID);
+		//FVector SpawnLocation = FireTransform->GetComponentLocation();
+		FVector SpawnLocation = GetMesh()->GetSocketLocation(TEXT("FireSocket"));
+		FRotator SpawnRotator = GetActorRotation();
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;					// Connection을 위해 Owner 필수 지정
+		SpawnParams.Instigator = GetInstigator();
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		GetWorld()->SpawnActor<AActor>(
+			FireballProjectileClass,
+			SpawnLocation,
+			SpawnRotator,
+			SpawnParams
+		);
 	}
 }
